@@ -8,7 +8,8 @@ import os.path
 from time import time
 
 prog_name = "pocket-to-html"
-prog_ver = "0.3"
+prog_ver = "0.4.0-beta"
+indent_str = "    "
 
 def usage_str(p_name):
     return """
@@ -35,10 +36,10 @@ g_misc.add_argument("-v", "-V", "--version", action="version", version=f"%(prog)
 args = parser.parse_args()
 
 bookmark_str = "<!DOCTYPE NETSCAPE-Bookmark-file-1>\n<!-- This is an automatically generated file.\n     It will be read and overwritten.\n     DO NOT EDIT! -->"
-bookmark_str += '\n<!-- Visit https://learn.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/platform-apis/aa753582(v=vs.85) to learn more -->\n<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">'
+bookmark_str += "\n<META HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html; charset=UTF-8\">"
 if args.mobile == True:
-    bookmark_str += '\n<META NAME="viewport" CONTENT="width=device-width, initial-scale=1">'
-bookmark_str += f'\n<META NAME="generator" CONTENT="{prog_name}.py v{prog_ver}">\n<TITLE>Bookmarks</TITLE>\n<H1>Bookmarks</H1>\n<DL><p>'
+    bookmark_str += "\n<META NAME=\"viewport\" CONTENT=\"width=device-width, initial-scale=1\">"
+bookmark_str += f"\n<META NAME=\"generator\" CONTENT=\"{prog_name}.py v{prog_ver}\">\n<TITLE>Bookmarks</TITLE>\n<H1>Bookmarks</H1>\n<DL><p>"
 
 def insert_bm(url, title, add_date, last_visit, last_mod, tags, indent_lvl=1):
     if args.interactive == True:
@@ -46,22 +47,22 @@ def insert_bm(url, title, add_date, last_visit, last_mod, tags, indent_lvl=1):
         title = input(f"The current entry's title is ''{temp_title}''.\nPress [ENTER] to keep it or type the new one:\n> ")
         if title == None:
             title = temp_title
-    temp_entry = f'\n{"    " * indent_lvl}<DT><A HREF="{url}" ADD_DATE="{add_date}"'
+    temp_entry = f"\n{indent_str * indent_lvl}<DT><A HREF=\"{url}\" ADD_DATE=\"{add_date}\""
     if args.ie == True:
         temp_entry += f' LAST_VISIT="{last_visit}"'
-    temp_entry += f'\n{"    " * (indent_lvl + 1)}LAST_MODIFIED="{last_mod}"'
+    temp_entry += f"\n{indent_str * (indent_lvl + 1)}LAST_MODIFIED=\"{last_mod}\""
     if args.tags == True and tags != None and tags != "":
-        temp_entry += f' TAGS="{tags}"'
-    temp_entry += f'>{html.escape(title)}</A>'
+        temp_entry += f" TAGS=\"{tags}\""
+    temp_entry += f">{html.escape(title)}</A>"
     return temp_entry
 
 def ins_mozsubdir(moz_cont, ind_lvl=1):
     global bookmark_str
     if "children" in moz_cont:
-        temp_str = f'\n{"    " * ind_lvl}<DT><H3 '
+        temp_str = f"\n{indent_str * ind_lvl}<DT><H3 "
         if args.ie == True:
             temp_str += "FOLDED "
-        temp_str += f'ADD_DATE="{trunc(moz_cont['dateAdded'] / 1000000)}" LAST_MODIFIED="{trunc(moz_cont['lastModified'] / 1000000)}">{html.escape(moz_cont['title'])}</H3>\n{"    " * ind_lvl}<DL><p>'
+        temp_str += f"ADD_DATE=\"{ trunc(moz_cont['dateAdded'] / 1000000) }\" LAST_MODIFIED=\"{ trunc(moz_cont['lastModified'] / 1000000) }\">{ html.escape(moz_cont['title']) }</H3>\n{ indent_str * ind_lvl }<DL><p>"
         for its_child in moz_cont['children']:
             if its_child["type"] == "text/x-moz-place":
                 temp_tags = None
@@ -70,7 +71,7 @@ def ins_mozsubdir(moz_cont, ind_lvl=1):
                 temp_str += insert_bm(its_child["uri"], its_child["title"], trunc(its_child["dateAdded"] / 1000000), trunc(its_child["lastModified"] / 1000000), trunc(its_child["lastModified"] / 1000000), temp_tags, ind_lvl + 1)
             else:
                 ins_mozsubdir(its_child, ind_lvl + 1)
-        temp_str += f"\n{"    " * ind_lvl}</DL><p>"
+        temp_str += f"\n{indent_str * ind_lvl}</DL><p>"
         bookmark_str += temp_str
 
 def moz_parse(moz_file):
@@ -91,7 +92,7 @@ def pocket_parse(pocket_file):
                 bookmark_str += "\n    <DT><H3 "
                 if args.ie == True:
                     bookmark_str += "FOLDED "
-                bookmark_str += f'ADD_DATE="{row['time_added']}" LAST_MODIFIED="{trunc(time())}">Pocket</H3>'
+                bookmark_str += f"ADD_DATE=\"{row['time_added']}\" LAST_MODIFIED=\"{trunc(time())}\">Pocket</H3>"
                 is_first_item = False
             item_tags = row["tags"]
             if item_tags != None:
