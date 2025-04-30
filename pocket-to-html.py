@@ -45,7 +45,7 @@ def insert_bm(url, title, add_date, last_visit, last_mod, tags, indent_lvl=1):
     if args.interactive == True:
         temp_title = title
         title = input(f"The current entry's title is ''{temp_title}''.\nPress [ENTER] to keep it or type the new one:\n> ")
-        if title == None:
+        if title == "":
             title = temp_title
     temp_entry = f"\n{indent_str * indent_lvl}<DT><A HREF=\"{url}\" ADD_DATE=\"{add_date}\""
     if args.ie == True:
